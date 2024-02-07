@@ -5,5 +5,6 @@
 ## Ссылки на проект
 
 IP 158.160.56.245
-api.vasilyevmovies.nomoredomainswork.ru/
+
+https://api.vasilyevmovies.nomoredomainswork.ru/
 
