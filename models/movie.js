@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { URL_CHECK } = require('../utils/constants');
 
 const movieScheme = new mongoose.Schema({
   country: {
@@ -44,7 +45,7 @@ const movieScheme = new mongoose.Schema({
     },
     validate: {
       validator: (image) => {
-        /https?:\/\/(www\.)?[a-zA-Z0-9-@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([a-zA-Z0-9()-@:%_+.~#?&//=]*)/.test(image);
+        URL_CHECK.test(image);
       },
       message: 'Неправильный формат URL',
     },
@@ -57,7 +58,7 @@ const movieScheme = new mongoose.Schema({
     },
     validate: {
       validator: (trailer) => {
-        /https?:\/\/(www\.)?[a-zA-Z0-9-@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([a-zA-Z0-9()-@:%_+.~#?&//=]*)/.test(trailer);
+        URL_CHECK.test(trailer);
       },
       message: 'Неправильный формат URL',
     },
@@ -70,7 +71,7 @@ const movieScheme = new mongoose.Schema({
     },
     validate: {
       validator: (thumb) => {
-        /https?:\/\/(www\.)?[a-zA-Z0-9-@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([a-zA-Z0-9()-@:%_+.~#?&//=]*)/.test(thumb);
+        URL_CHECK.test(thumb);
       },
       message: 'Неправильный формат URL',
     },

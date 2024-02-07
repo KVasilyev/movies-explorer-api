@@ -3,11 +3,13 @@ const BadRequestError = require('../errors/BadRequestError');
 const NotFoundError = require('../errors/NotFoundError');
 const ForbiddenError = require('../errors/ForbiddenError');
 
+const { CREATED, OK } = require('../utils/constants');
+
 // Возврат всех сохраненных пользователем фильмов
 module.exports.getMoviesList = (req, res, next) => {
   Movies.find({ owner: req.user._id })
     .then((movies) => {
-      res.status(200).send({
+      res.status(OK).send({
         movies,
       });
     })
@@ -45,7 +47,7 @@ module.exports.addMovie = (req, res, next) => {
     owner,
   })
     .then((movie) => {
-      res.send({
+      res.status(CREATED).send({
         movie,
       });
     })
@@ -70,7 +72,7 @@ module.exports.deleteMovie = (req, res, next) => {
         return;
       }
       movie.deleteOne()
-        .then(() => res.send({ message: 'Фильм удален' }))
+        .then(() => res.status(OK).send({ message: 'Фильм удален' }))
         .catch((err) => {
           if (err.name === 'CastError') {
             next(new BadRequestError('Переданы некорректные данные'));

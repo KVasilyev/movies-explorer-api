@@ -8,12 +8,14 @@ const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
 const UnauthorizedError = require('../errors/UnauthorizedError');
 
+const { CREATED, OK, MONGO_DUPLICATE_ERROR } = require('../utils/constants');
+
 // Пользователь
 module.exports.getUser = (req, res, next) => {
   const owner = req.user._id;
   User.findById(owner)
     .then((user) => {
-      res.status(200).send({
+      res.status(CREATED).send({
         user,
       });
     })
@@ -27,14 +29,16 @@ module.exports.updateUser = (req, res, next) => {
   User.findByIdAndUpdate(owner, { name, email }, { new: true, runValidators: true })
     .orFail()
     .then((user) => {
-      res.send({
+      res.status(OK).send({
         name: user.name,
         _id: user._id,
         email: user.email,
       });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.code === MONGO_DUPLICATE_ERROR) {
+        next(new ConflictError('Этот e-mail уже зарегистрирован'));
+      } else if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные'));
         return;
       }
@@ -50,7 +54,7 @@ module.exports.signinUser = (req, res, next) => {
       if (!user) {
         throw new UnauthorizedError('Неправильные почта или пароль');
       } else {
-        bcrypt.compare(password, user.password)
+        return bcrypt.compare(password, user.password)
           .then((matched) => {
             if (matched) {
               const token = jwt.sign(
@@ -58,7 +62,7 @@ module.exports.signinUser = (req, res, next) => {
                 NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', // Ключ
                 { expiresIn: '7d' },
               );
-              res.send({
+              res.status(OK).send({
                 token,
               });
             } else {
@@ -82,14 +86,14 @@ module.exports.createUser = (req, res, next) => {
       password: hash,
     })
       .then((user) => {
-        res.status(200).send({
+        res.status(OK).send({
           name: user.name,
           _id: user._id,
           email: user.email,
         });
       })
       .catch((err) => {
-        if (err.code === 11000) {
+        if (err.code === MONGO_DUPLICATE_ERROR) {
           next(new ConflictError('Этот e-mail уже зарегистрирован'));
         } else if (err.name === 'ValidationError') {
           next(new BadRequestError('Некорректные данные'));
